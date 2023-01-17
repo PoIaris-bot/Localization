@@ -37,7 +37,7 @@ def run(
         device='',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         view_img=False,  # show results
         nosave=False,  # do not save images/videos
-        project=ROOT / 'runs/test',  # save results to project/name
+        project=ROOT / 'runs/detect',  # save results to project/name
         name='exp',  # save results to project/name
         exist_ok=False,  # existing project/name ok, do not increment
         line_thickness=3,  # bounding box thickness (pixels)
@@ -138,17 +138,18 @@ def run(
 
                         _, binary = cv2.threshold(pred_seg, 0, 255, cv2.THRESH_BINARY)
                         contours, _ = cv2.findContours(binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                        area = []
-                        for j in range(len(contours)):
-                            area.append(cv2.contourArea(contours[j]))
-                            contours[j][:, :, 0] += int(xyxy[0, 0])
-                            contours[j][:, :, 1] += int(xyxy[0, 1])
-                        max_idx = np.argmax(area)
-                        m = cv2.moments(contours[max_idx])
-                        x = int(m['m10'] / m['m00'])
-                        y = int(m['m01'] / m['m00'])
-                        cv2.circle(im0, (x, y), 3, (0, 255, 0), line_thickness)
-                        cv2.drawContours(im0, contours, max_idx, (0, 255, 0), line_thickness)
+                        if len(contours):
+                            area = []
+                            for j in range(len(contours)):
+                                area.append(cv2.contourArea(contours[j]))
+                                contours[j][:, :, 0] += int(xyxy[0, 0])
+                                contours[j][:, :, 1] += int(xyxy[0, 1])
+                            max_idx = np.argmax(area)
+                            m = cv2.moments(contours[max_idx])
+                            x = int(m['m10'] / m['m00'])
+                            y = int(m['m01'] / m['m00'])
+                            cv2.circle(im0, (x, y), 3, (0, 255, 0), line_thickness)
+                            cv2.drawContours(im0, contours, max_idx, (0, 255, 0), line_thickness)
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
                     windows.append(p)
@@ -197,7 +198,7 @@ def parse_opt():
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', type=bool, help='show results', default=False)
     parser.add_argument('--nosave', type=bool, help='do not save images/videos', default=False)
-    parser.add_argument('--project', default=ROOT / 'runs/test', help='save results to project/name')
+    parser.add_argument('--project', default=ROOT / 'runs/detect', help='save results to project/name')
     parser.add_argument('--name', default='exp', help='save results to project/name')
     parser.add_argument('--exist-ok', type=bool, help='existing project/name ok, do not increment', default=False)
     parser.add_argument('--line-thickness', default=3, type=int, help='bounding box thickness (pixels)')
